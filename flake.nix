@@ -7,13 +7,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-      # inputs.nixpkgs.follows = "nixpkgs"; 
-        # ^^ why does this throw a warning now that 
-            # warning: 
-            # input 'flake-utils' has an override for a non-existent input 'nixpkgs'
-    };
+    flake-utils.url = "github:numtide/flake-utils";
 
     # see :help nixCats.flake.inputs
     # If you want your plugin to be loaded by the standard overlay,
@@ -108,12 +102,12 @@
       url = "github:numToStr/Comment.nvim";
       flake = false;
     };
-    "plugins-hlargs" = {
-      url = "github:m-demare/hlargs.nvim";
-      flake = false;
-    };
     "plugins-harpoon" = {
       url = "github:ThePrimeagen/harpoon";
+      flake = false;
+    };
+    "plugins-hlargs" = {
+      url = "github:m-demare/hlargs.nvim";
       flake = false;
     };
     "plugins-fidget" = {
@@ -219,7 +213,6 @@
             lspconfig
             lualine
             hlargs
-            Comment
             fidget
             telescope-file-browser
             colorizer
@@ -235,6 +228,9 @@
             mini-ai
           ];
           general = with pkgs.vimPlugins; [
+            # Theme
+            onedark-vim
+            # catppuccin-nvim
             # telescope
             telescope-fzf-native-nvim
             plenary-nvim
@@ -254,7 +250,11 @@
             cmp-nvim-lsp-signature-help
             cmp-cmdline-history
             lspkind-nvim
-            # other
+            nvim-lspconfig
+            lualine-nvim
+            gitsigns-nvim
+            which-key-nvim
+            comment-nvim
             vim-sleuth
             vim-fugitive
             vim-rhubarb
@@ -329,54 +329,60 @@
 
       # see :help nixCats.flake.outputs.packaging
       packageDefinitions = {
-        nixCats = nixVimBuilder settings.nixCats {
-          generalBuildInputs = true;
-          markdown = true;
-          gitPlugins = true;
-          general = true;
-          custom = true;
-          neonixdev = true;
-          test = true;
-          debug = true;
-          # this does not have an associated category of plugins, 
-          # but lua can still check for it
-          lspDebugMode = false;
-          # you could also pass something else:
-          colorscheme = "rose-pine";
-          theWorstCat = {
-            thing1 = [ "MEOW" "HISSS" ];
-            thing2 = [
-              {
-                thing3 = [ "give" "treat" ];
-              }
-              "I LOVE KEYBOARDS"
-            ];
-            thing4 = "couch is for scratching";
+        nixCats = {
+          settings = settings.nixCats; 
+          categories = {
+            generalBuildInputs = true;
+            markdown = true;
+            gitPlugins = true;
+            general = true;
+            custom = true;
+            neonixdev = true;
+            test = true;
+            debug = false;
+            # this does not have an associated category of plugins, 
+            # but lua can still check for it
+            lspDebugMode = false;
+            # you could also pass something else:
+            colorscheme = "rose-pine";
+            theWorstCat = {
+              thing1 = [ "MEOW" "HISSS" ];
+              thing2 = [
+                {
+                  thing3 = [ "give" "treat" ];
+                }
+                "I LOVE KEYBOARDS"
+              ];
+              thing4 = "couch is for scratching";
+            };
+            # you could :lua print(vim.inspect(require('nixCats').theWorstCat))
+            # I got carried away and it worked FIRST TRY.
+            # see :help nixCats
           };
-          # you could :lua print(vim.inspect(require('nixCats').theWorstCat))
-          # I got carried away and it worked FIRST TRY.
-          # see :help nixCats
         };
-        regularCats = nixVimBuilder settings.unwrappedLua {
-          generalBuildInputs = true;
-          markdown = true;
-          gitPlugins = true;
-          general = true;
-          custom = true;
-          neonixdev = true;
-          debug = true;
-          test = true;
-          lspDebugMode = false;
-          colorscheme = "rose-pine";
-          theWorstCat = {
-            thing1 = [ "MEOW" "HISSS" ];
-            thing2 = [
-              {
-                thing3 = [ "give" "treat" ];
-              }
-              "I LOVE KEYBOARDS"
-            ];
-            thing4 = "couch is for scratching";
+        regularCats = { 
+          settings = settings.unwrappedLua;
+          categories = {
+            generalBuildInputs = true;
+            markdown = true;
+            gitPlugins = true;
+            general = true;
+            custom = true;
+            neonixdev = true;
+            debug = true;
+            test = true;
+            lspDebugMode = false;
+            colorscheme = "rose-pine";
+            theWorstCat = {
+              thing1 = [ "MEOW" "HISSS" ];
+              thing2 = [
+                {
+                  thing3 = [ "give" "treat" ];
+                }
+                "I LOVE KEYBOARDS"
+              ];
+              thing4 = "couch is for scratching";
+            };
           };
         };
       };
@@ -386,28 +392,38 @@
 
     # see :help nixCats.flake.outputs.packages
     {
-      # choose your default overlay package
-      overlays = { default = self: super: { inherit (packageDefinitions) nixCats; }; }
-        # this will make an overlay out of each of the packageDefinitions defined above
-        // builtins.mapAttrs (name: value: (self: super: { ${name} = value; })) packageDefinitions;
-
       # choose your default package
-      packages = { default = packageDefinitions.nixCats; }
+      packages = { default = (nixVimBuilder packageDefinitions.nixCats); }
         # this will add all packageDefinitions defined above
-        // packageDefinitions;
+        // (builtins.mapAttrs (value: nixVimBuilder value) packageDefinitions);
 
       # choose your package for devShell
       # and whatever else you want in it.
       devShell = pkgs.mkShell {
         name = "nixCats.nvim";
-        packages = [ packageDefinitions.nixCats ];
+        packages = [ (nixVimBuilder packageDefinitions.nixCats) ];
         inputsFrom = [ ];
         shellHook = ''
         '';
       };
+
+      # this will make an overlay out of each of the packageDefinitions defined above
+      overlays = let
+        # choose the name and value of your defaultOverlayPackage
+        defaultOverlayPackage = {
+          name = "nixCats";
+          value = packageDefinitions.nixCats;
+        };
+      in
+      { default = (self: super: { ${defaultOverlayPackage.name} = nixVimBuilder defaultOverlayPackage.value; }); } 
+      // (builtins.mapAttrs (name: value: (self: super: { ${name} = nixVimBuilder value; })) packageDefinitions);
+
       # To choose settings and categories from the flake that calls this flake.
       customPackager = nixVimBuilder;
+
+      # The overlay that allows for auto import with plugins-pluginname
       standardPluginOverlay = import ./overlays/standardPluginOverlay.nix;
+      # You may use these to modify some or all of your categoryDefinitions
       customBuilders = {
         # These 2 will still recieve the flake's lua when wrapRc = true;
         fresh = import ./builder helpPath self;

@@ -127,7 +127,8 @@ add to a category directly.
 ---------------------------------------------------------------------------------------
 Neovim Builder Creation:                        *nixCats.flake.outputs.builder*
 
-We now create a builder function that takes 2 arguments.
+We now create a builder function that takes as
+its argument a set with 2 sets in it.
 A set of categories and a set of settings.
 
 The settings set is defined in the next section. 
@@ -140,8 +141,7 @@ is a set of named boolean values like this:
 { categoryname1 = true; categoryname2 = false; etc... }
 It will tell us which categories to include per package.
 
-To define this function that takes this set of categories and 
-the settings as an argument, 
+To define this function,
 we import ./builder/default.nix and supply it the following.
 
 1. The path to the help directory so that it is always included.
@@ -150,8 +150,9 @@ we import ./builder/default.nix and supply it the following.
 3. The pkgs set so that it can use it for making its own derivations.
 4. our set of categoryDefinitions.
 
-And it will return a function that takes the 
-settings and categories tables as arguments
+And it will return a function that takes a set as an argument containing:
+1. the set of settings
+2. the set of included categories
 >nix
   nixVimBuilder = import ./builder helpPath self pkgs categoryDefinitions;
   # notice how we provide it with the set we define below?
@@ -203,8 +204,8 @@ These are the defaults:
   settings = {
     defaults = {
 <
-      # do you want to use lua from this flake?
-      # or would you rather do it in your .config/<configDirName>?
+      # do you want to package the lua from this flake in the store?
+      # or would you rather it just read it in your .config/<configDirName>?
       # nixCats and this help will work either way.
       # this value will also be included in nixCats.
 >nix
@@ -214,9 +215,7 @@ These are the defaults:
       # i.e. .config, .local/share, .local/state, .cache, etc... be?
       # This option is very useful when you want 
       # to clone an unwrapped config straight to the .config dir.
-      # IMPORTANT: because this affects all nvim directories, you will need to
-      # log into anything that needs auth again for it to save the auth to the
-      # new folders when you change this.
+      # see :help `$NVIM_APPNAME`
 >nix
       configDirName = "nvim";
 
@@ -261,21 +260,24 @@ as well as the general startupPlugins category.
 an example package definition:
 >nix
   packageDefinitions = {
-    nixCats = nixVimBuilder settings.nixCats {
-      custom = true;
-      gitPlugins = true;
-      general = true;
-      neonixdev = true;
+    nixCats = { 
+      setting = settings.nixCats;
+      categories = {
+        custom = true;
+        gitPlugins = true;
+        general = true;
+        neonixdev = true;
 
-      # this does not have an associated category of plugins, 
-      # but lua can still check for it
-      lspDebugMode = false;
+        # this does not have an associated category of plugins, 
+        # but lua can still check for it
+        lspDebugMode = false;
 
-      # you could also pass something else and it calls 
-      # builtins.toString on it and passes it in as a string
-      theBestCat = "says meow!!!";
-      # maybe you need to pass a port or path in or something idk.
-      # you could :lua print(require('nixCats').theBestCat)
+        # you could also pass something else and it calls 
+        # builtins.toString on it and passes it in as a string
+        theBestCat = "says meow!!!";
+        # maybe you need to pass a port or path in or something idk.
+        # you could :lua print(require('nixCats').theBestCat)
+      };
     };
   };
 <
@@ -290,7 +292,8 @@ Flake devShell and package definitions         *nixCats.flake.outputs.packages*
 This will automatically add all of the packages in the 
 packageDefinitions set defined in the section above.
 
-However you still must choose your default packages.
+However you still must choose your default packages
+for packages, devShell, and overlays.
 
 In addition, it defines a way for you to choose what
 categories and settings are included in 
@@ -301,7 +304,7 @@ Exactly like :help `nixCats.flake.outputs.packaging`
 This can be quite handy when you only need some things
 from a flake you defined, 
 but dont want to define a package in the flake for it.
-This option is called with customPackager.${system}
+This option is called with nixCats.customPackager.${system}
 
 For this next section, these are related to:
 :help `nixCats.flake.outputs.builder`
@@ -335,7 +338,7 @@ Otherwise, they are the equivalent to the two above.
 The order of arguments for these builder functions 
 is the same as the regular one.
 
-path: pkgs: categoryDefinitions: settings: categories:
+path: pkgs: categoryDefinitions: { settings, categories }:
 
 ---------------------------------------------------------------------------------------
 vim:tw=78:ts=8:ft=help:norl:
