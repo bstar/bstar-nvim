@@ -4,6 +4,8 @@ This is a kickstarter style repo. It borrows a LOT of lua from [kickstart.nvim](
 
 The lua is not all 1 file. The reason for that is personal preference. It is short enough that it could be.
 
+This repo is not a lua showcase. You are meant to use your own lua once you understand what is going on.
+
 It is aimed at people who know enough lua to comfortably proceed from a kickstarter level setup
 who want to swap to using nix while still using lua for configuration.
 
@@ -172,37 +174,40 @@ If you want to add it to another flake, choose one of these methods:
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
-            nixCats-nvim.outputs.overlays.${system}.nixCats
-            nixCats-nvim.outputs.overlays.${system}.regularCats
+            nixCats-nvim.overlays.${system}.nixCats
+            nixCats-nvim.overlays.${system}.regularCats
           ];
         };
         # this is the equivalent of the nixCats package
-        customvim = nixCats-nvim.outputs.customPackager.${system} {
-          wrapRc = true;
-          configDirName = "nixCats-nvim";
-          viAlias = false;
-          vimAlias = true;
-        } {
-          generalBuildInputs = true;
-          markdown = true;
-          gitPlugins = true;
-          general = true;
-          custom = true;
-          neonixdev = true;
-          test = true;
-          debug = false;
-          # this does not have an associated category of plugins, 
-          # but lua can still check for it
-          lspDebugMode = false;
-          # you could also pass something else:
-          colorscheme = "onedark";
-          # you could :lua print(vim.inspect(require('nixCats')))
-          # I got carried away and it worked FIRST TRY.
-          # see :help nixCats
+        customvim = nixCats-nvim.customPackager.${system} {
+          settings = {
+            wrapRc = true;
+            configDirName = "nixCats-nvim";
+            viAlias = false;
+            vimAlias = true;
+          };
+          categories = {
+            generalBuildInputs = true;
+            markdown = true;
+            gitPlugins = true;
+            general = true;
+            custom = true;
+            neonixdev = true;
+            test = true;
+            debug = false;
+            # this does not have an associated category of plugins, 
+            # but lua can still check for it
+            lspDebugMode = false;
+            # you could also pass something else:
+            colorscheme = "onedark";
+            # you could :lua print(vim.inspect(require('nixCats')))
+            # I got carried away and it worked FIRST TRY.
+            # see :help nixCats
+          };
         };
     in
         {
-            packages.default = nixCats-nvim.outputs.packages.${system}.nixCats;
+            packages.default = nixCats-nvim.packages.${system}.nixCats;
             packages.nixCats = pkgs.nixCats;
             packages.regularCats = pkgs.regularCats;
             packages.customvim = customvim;
@@ -244,3 +249,6 @@ I also borrowed some code from nixpkgs and included links.
 - [`Luca's super simple`](https://github.com/Quoteme/neovim-flake):
   Definitely the simplest example I have seen thus far. I took it and ran with it, read a LOT of docs and nixpkgs source code and then made this.
   I mentioned it above in the special mentions. As someone with no exposure to functional programming, such a simple example was absolutely fantastic.
+- [`andromeda-neovim`](https://github.com/lecoqjacob/andromeda-neovim):
+A repo which took an early version of nixCats and added many things to it such as a nix wrapper for lazy, at the cost of losing the simplistic design and the help.
+It made me happy to see people taking inspiration from my work, so I added it to the list.
