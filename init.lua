@@ -1,8 +1,8 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.opt.cursorline = true
 vim.opt.list = true
 vim.o.hlsearch = false
-vim.wo.number = true
 vim.o.mouse = 'a'
 vim.o.smarttab = true
 vim.o.smartindent = true
@@ -18,7 +18,8 @@ vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 vim.wo.signcolumn = 'yes'
-vim.wo.relativenumber = true
+vim.o.number = true
+vim.o.relativenumber = true
 vim.o.updatetime = 250
 vim.o.timeoutlen = 300
 vim.o.completeopt = 'menu,preview,noselect'
@@ -26,6 +27,7 @@ vim.o.termguicolors = true
 vim.diagnostic.config { float = { border = "single" }, }
 vim.wo.fillchars='eob: '
 vim.o.statuscolumn = "%C%s%l "
+vim.opt.clipboard:append { 'unnamed', 'unnamedplus' }
 
 vim.api.nvim_create_autocmd("FileType", {
   desc = "remove formatoptions",
@@ -77,7 +79,6 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 vim.keymap.set('n', '<C-W>', '<c-w>', { desc = '+window'})
 vim.keymap.set({"n", "v", "x"}, '"', '"', { desc = '+registers'})
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
-
 
 -- kickstart.nvim starts you with this. 
 -- But it constantly clobbers your system clipboard whenever you delete anything.
