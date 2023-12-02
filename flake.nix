@@ -18,10 +18,10 @@
     # overlay defined for custom builds in the overlays directory.
 
     # Theme
-    "plugins-mini-ai" = {
-      url = "github:echasnovski/mini.ai";
-      flake = false;
-    };
+    # "plugins-mini-ai" = {
+    #   url = "github:echasnovski/mini.ai";
+    #   flake = false;
+    # };
     "plugins-trouble" = {
       url = "github:folke/trouble.nvim";
       flake = false;
@@ -225,7 +225,7 @@
             trouble
             nvim-dap-vscode-js
             mini-indentscope
-            mini-ai
+            # mini-ai
           ];
           general = with pkgs.vimPlugins; [
             # Theme
@@ -339,7 +339,7 @@
             custom = true;
             neonixdev = true;
             test = true;
-            debug = false;
+            debug = true;
             # this does not have an associated category of plugins, 
             # but lua can still check for it
             lspDebugMode = false;

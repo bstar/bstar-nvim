@@ -26,7 +26,6 @@ vim.o.completeopt = 'menu,preview,noselect'
 vim.o.termguicolors = true
 vim.diagnostic.config { float = { border = "single" }, }
 vim.wo.fillchars='eob: '
-vim.o.statuscolumn = "%C%s%l "
 vim.opt.clipboard:append { 'unnamed', 'unnamedplus' }
 
 vim.api.nvim_create_autocmd("FileType", {
