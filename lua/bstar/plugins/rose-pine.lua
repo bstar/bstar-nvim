@@ -7,7 +7,7 @@ require('rose-pine').setup({
 	dim_nc_background = false,
 	disable_background = false,
 	disable_float_background = false,
-	disable_italics = false,
+	disable_italics = true,
 
 	--- @usage string hex value or named color from rosepinetheme.com/palette
 	groups = {
@@ -44,10 +44,10 @@ require('rose-pine').setup({
                 LineNr = { fg = '#dddddd' },
                 LineNrAbove = { fg = '#403d52' },
                 LineNrBelow = { fg = '#403d52' },
-                Visual = { bg = '#11111B' },
+                Visual = { bg = '#211f30' },
 
 		-- Blend colours against the "base" background
-		CursorLine = { bg = '#000000', blend = 10 },
+		CursorLine = { bg = '#211f30', blend = 10 },
 		-- StatusLine = { fg = 'love', bg = 'love', blend = 10 },
 
 		-- By default each group adds to the existing config.
