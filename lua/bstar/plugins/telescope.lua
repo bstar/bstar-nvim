@@ -106,9 +106,3 @@ vim.api.nvim_set_keymap(
   { noremap = true }
 )
 
-vim.api.nvim_set_keymap(
-  "n",
-  "<leader>fe",
-  ":Telescope file_browser path=%:p:h select_buffer=true<CR>",
-  { noremap = true }
-)
